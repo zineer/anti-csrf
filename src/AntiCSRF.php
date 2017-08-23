@@ -196,7 +196,7 @@ class AntiCSRF
      *
      * @return boolean
      */
-    public function validateRequest()
+    public function validateRequest($lockTo = null)
     {
         if (!isset($this->session[$this->sessionIndex])) {
             // We don't even have a session array initialized
@@ -232,7 +232,11 @@ class AntiCSRF
         unset($this->session[$this->sessionIndex][$index]);
 
         // Which form action="" is this token locked to?
-        $lockTo = $this->server['REQUEST_URI'];
+        if (empty($lockTo)) {
+            $lockTo = isset($this->server['REQUEST_URI'])
+                ? $this->server['REQUEST_URI']
+                : '/';
+        }
         if (\preg_match('#/$#', $lockTo)) {
             // Trailing slashes are to be ignored
             $lockTo = Binary::safeSubstr(
